@@ -252,7 +252,7 @@
         </div>
 
         <button type="button" id="pulse-return-tez" class="pulse-confirm__return-btn">
-          ← Return to Amazon Tez
+          ← Return to Amazon Now
         </button>
 
       </div>

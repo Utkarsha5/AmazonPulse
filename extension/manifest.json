@@ -4,13 +4,16 @@
   "version": "0.1.0",
   "description": "Pulse UI overlay for Amazon Tez quick-commerce pages.",
   "permissions": ["storage", "activeTab"],
-  "host_permissions": ["*://*.amazon.in/*"],
+  "host_permissions": ["*://*.amazon.in/*", "http://localhost:8000/*"],
   "background": {
     "service_worker": "background.js"
   },
   "content_scripts": [
     {
-      "matches": ["*://*.amazon.in/tez/*"],
+      "matches": [
+        "*://*.amazon.in/tez/*",
+        "*://*.amazon.in/gp/cart/view.html*"
+      ],
       "js": ["content.js"],
       "css": ["styles.css"],
       "run_at": "document_end"

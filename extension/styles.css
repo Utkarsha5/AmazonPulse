@@ -121,7 +121,1044 @@
 
 .amazon-pulse-sidebar__module-content {
   min-height: 64px;
+  padding: 12px;
   border-radius: 6px;
   background: #f7fafa;
-  border: 1px dashed #c8d1da;
+  border: 1px solid #e3e6e6;
+}
+
+.amazon-pulse-intent-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.amazon-pulse-input {
+  width: 100%;
+  padding: 10px 12px;
+  font-family: inherit;
+  font-size: 13px;
+  border: 1px solid #c8d1da;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #0f1111;
+  box-sizing: border-box;
+}
+
+.amazon-pulse-input:focus {
+  outline: 2px solid #00a8a8;
+  outline-offset: 1px;
+  border-color: #00a8a8;
+}
+
+.amazon-pulse-btn {
+  padding: 9px 14px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s ease, opacity 0.15s ease;
+}
+
+.amazon-pulse-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.amazon-pulse-btn--primary {
+  color: #ffffff;
+  background: #00a8a8;
+}
+
+.amazon-pulse-btn--primary:hover:not(:disabled) {
+  background: #008f8f;
+}
+
+.amazon-pulse-results {
+  min-height: 0;
+}
+
+.amazon-pulse-loading,
+.amazon-pulse-muted {
+  margin: 0;
+  font-size: 13px;
+  color: #565959;
+}
+
+.amazon-pulse-error {
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #fff4f4;
+  border: 1px solid #f5c6cb;
+  color: #7a1212;
+  font-size: 12px;
+}
+
+.amazon-pulse-error p {
+  margin: 6px 0 0;
+}
+
+.amazon-pulse-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  font-size: 10px;
+  font-weight: 700;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+.amazon-pulse-badge--green {
+  color: #ffffff;
+  background: linear-gradient(135deg, #067d62 0%, #04865a 100%);
+}
+
+.amazon-pulse-badge--teal {
+  color: #ffffff;
+  background: #00a8a8;
+}
+
+.amazon-pulse-result,
+.amazon-pulse-alert,
+.amazon-pulse-checkout {
+  font-size: 13px;
+}
+
+.amazon-pulse-result__header,
+.amazon-pulse-alert__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.amazon-pulse-result__label,
+.amazon-pulse-alert__due {
+  font-size: 11px;
+  font-weight: 600;
+  color: #565959;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.amazon-pulse-result__summary {
+  margin: 0 0 10px;
+  color: #232f3e;
+}
+
+.amazon-pulse-bundle-list {
+  margin: 0 0 12px;
+  padding: 0;
+  list-style: none;
+}
+
+.amazon-pulse-bundle-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 0;
+  border-bottom: 1px solid #e3e6e6;
+}
+
+.amazon-pulse-bundle-item:last-child {
+  border-bottom: none;
+}
+
+.amazon-pulse-bundle-item__title {
+  font-weight: 600;
+  color: #0f1111;
+}
+
+.amazon-pulse-bundle-item__meta {
+  font-size: 12px;
+  color: #565959;
+}
+
+.amazon-pulse-result__footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 10px;
+  border-top: 1px solid #dde3ea;
+  font-weight: 600;
+}
+
+.amazon-pulse-alert__item,
+.amazon-pulse-checkout__title {
+  margin: 0 0 8px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #232f3e;
+}
+
+.amazon-pulse-alert__message,
+.amazon-pulse-checkout__message {
+  margin: 0 0 10px;
+  color: #565959;
+  line-height: 1.45;
+}
+
+.amazon-pulse-alert__meta {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
+
+.amazon-pulse-alert__meta div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 12px;
+}
+
+.amazon-pulse-alert__meta dt {
+  margin: 0;
+  color: #565959;
+}
+
+.amazon-pulse-alert__meta dd {
+  margin: 0;
+  font-weight: 600;
+  color: #0f1111;
+  text-align: right;
+}
+
+.amazon-pulse-checkout__price {
+  margin: 0 0 8px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #b12704;
+}
+
+.amazon-pulse-checkout__order {
+  margin: 0;
+  font-size: 12px;
+  color: #565959;
+}
+
+.amazon-pulse-community {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid #dde3ea;
+}
+
+.amazon-pulse-community__title {
+  margin: 0 0 10px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #232f3e;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.amazon-pulse-community-cart {
+  padding: 10px;
+  margin-bottom: 8px;
+  background: #ffffff;
+  border: 1px solid #e3e6e6;
+  border-radius: 8px;
+}
+
+.amazon-pulse-community-cart:last-child {
+  margin-bottom: 0;
+}
+
+.amazon-pulse-community-cart__header {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+  font-size: 12px;
+}
+
+.amazon-pulse-community-cart__header span {
+  color: #565959;
+  white-space: nowrap;
+}
+
+.amazon-pulse-community-cart__items {
+  margin: 0 0 6px;
+  padding-left: 16px;
+  font-size: 12px;
+  color: #0f1111;
+}
+
+.amazon-pulse-community-cart__total {
+  font-size: 13px;
+  font-weight: 700;
+  color: #b12704;
+  text-align: right;
+}
+
+/* ── Sidebar footer & checkout button ── */
+
+.amazon-pulse-sidebar__footer {
+  flex-shrink: 0;
+  padding: 12px 16px;
+  background: #ffffff;
+  border-top: 1px solid #dde3ea;
+}
+
+.amazon-pulse-checkout-btn {
+  display: block;
+  width: 100%;
+  padding: 13px 16px;
+  font-family: "Amazon Ember", Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: #ffffff;
+  background: linear-gradient(135deg, #ff9900 0%, #e68a00 100%);
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  letter-spacing: 0.01em;
+  box-shadow: 0 2px 8px rgba(255, 153, 0, 0.35);
+  transition: background 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+}
+
+.amazon-pulse-checkout-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #e68a00 0%, #cc7a00 100%);
+  box-shadow: 0 4px 12px rgba(255, 153, 0, 0.45);
+}
+
+.amazon-pulse-checkout-btn:active:not(:disabled) {
+  transform: scale(0.99);
+}
+
+.amazon-pulse-checkout-btn:disabled {
+  opacity: 0.75;
+  cursor: not-allowed;
+}
+
+/* ── Community Section (below primary bundle) ── */
+
+.amazon-pulse-community-section {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 2px dashed #dde3ea;
+}
+
+.amazon-pulse-community-section__title {
+  margin: 0 0 10px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #232f3e;
+}
+
+.amazon-pulse-community-card {
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  background: #ffffff;
+  border: 1px solid #dde3ea;
+  border-radius: 10px;
+  border-left: 3px solid #ff9900;
+}
+
+.amazon-pulse-community-card:last-child {
+  margin-bottom: 0;
+}
+
+.amazon-pulse-community-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.amazon-pulse-community-card__name {
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f1111;
+}
+
+.amazon-pulse-community-card__fire-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 3px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #ffffff;
+  background: linear-gradient(135deg, #e63900 0%, #c72d00 100%);
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+.amazon-pulse-community-card__items {
+  margin: 0 0 6px;
+  padding-left: 16px;
+  font-size: 12px;
+  color: #0f1111;
+  list-style: disc;
+}
+
+.amazon-pulse-community-card__total {
+  font-size: 13px;
+  font-weight: 700;
+  color: #b12704;
+  text-align: right;
+}
+
+/* ── Community card footer: price + 1-Tap Add button side by side ── */
+
+.amazon-pulse-community-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.amazon-pulse-community-add-btn {
+  flex-shrink: 0;
+  padding: 5px 11px;
+  font-family: "Amazon Ember", Arial, sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  color: #0f1111;
+  background: #ffd814;
+  border: 1px solid #c7a600;
+  border-radius: 8px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.amazon-pulse-community-add-btn:hover:not(:disabled) {
+  background: #f7ca00;
+  border-color: #b8960a;
+}
+
+.amazon-pulse-community-add-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.85;
+}
+
+/* ── Primary bundle "Add Bundle to Pulse Cart" button ── */
+
+.amazon-pulse-add-bundle-btn {
+  display: block;
+  width: 100%;
+  margin-top: 12px;
+  padding: 10px 14px;
+  font-family: "Amazon Ember", Arial, sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f1111;
+  background: #ffd814;
+  border: 1px solid #c7a600;
+  border-radius: 8px;
+  cursor: pointer;
+  letter-spacing: 0.01em;
+  box-shadow: 0 1px 3px rgba(199, 166, 0, 0.3);
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.amazon-pulse-add-bundle-btn:hover:not(:disabled) {
+  background: #f7ca00;
+  border-color: #b8960a;
+  box-shadow: 0 2px 6px rgba(199, 166, 0, 0.4);
+}
+
+.amazon-pulse-add-bundle-btn:active:not(:disabled) {
+  transform: scale(0.99);
+}
+
+.amazon-pulse-add-bundle-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.85;
+}
+
+/* ── Frictionless queue badge ── */
+
+.amazon-pulse-queued-badge {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 12px;
+  padding: 5px 10px;
+}
+
+/* ── Tez product card injections ── */
+
+.amazon-pulse-card-image {
+  position: relative !important;
+}
+
+.amazon-pulse-confidence-badge {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  z-index: 2;
+  padding: 4px 8px;
+  font-family: "Amazon Ember", Arial, sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: 0.01em;
+  color: #ffffff;
+  background: linear-gradient(135deg, #067d62 0%, #04865a 100%);
+  border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(6, 125, 98, 0.35);
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.amazon-pulse-buy-btn {
+  flex-shrink: 0;
+  margin-left: 6px;
+  padding: 7px 12px;
+  font-family: "Amazon Ember", Arial, sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+  color: #ffffff;
+  background: #232f3e;
+  border: 1px solid #232f3e;
+  border-radius: 999px;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: 0 1px 3px rgba(35, 47, 62, 0.2);
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+}
+
+.amazon-pulse-buy-btn:hover {
+  background: #37475a;
+  border-color: #37475a;
+}
+
+.amazon-pulse-buy-btn:active {
+  background: #131a22;
+  border-color: #131a22;
+  transform: scale(0.98);
+}
+
+.amazon-pulse-buy-btn:focus-visible {
+  outline: 2px solid #00a8a8;
+  outline-offset: 2px;
+}
+
+/* ── Amazon Cart Page Override ────────────────────────────────────────────── */
+
+#pulse-cart-override {
+  font-family: "Amazon Ember", Arial, sans-serif;
+  font-size: 14px;
+  color: #0f1111;
+  margin: 20px auto;
+  max-width: 900px;
+  padding: 0 16px;
+}
+
+.pulse-cart-container {
+  background: #ffffff;
+  border: 1px solid #dde3ea;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(35, 47, 62, 0.1);
+}
+
+/* Header */
+.pulse-cart-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 24px;
+  background: #232f3e;
+  color: #ffffff;
+  border-bottom: 3px solid #00a8a8;
+}
+
+.pulse-cart-header__icon {
+  font-size: 28px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.pulse-cart-header__title {
+  margin: 0 0 4px;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.pulse-cart-header__sub {
+  margin: 0;
+  font-size: 12px;
+  color: #a0aab4;
+}
+
+.pulse-cart-header__sub strong {
+  color: #00d4d4;
+}
+
+/* Item list */
+.pulse-cart-items {
+  padding: 8px 24px;
+  border-bottom: 1px solid #e3e6e6;
+}
+
+.pulse-cart-item {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid #f0f2f2;
+  font-size: 14px;
+}
+
+.pulse-cart-item:last-child {
+  border-bottom: none;
+}
+
+.pulse-cart-item__index {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: #ffffff;
+  background: #00a8a8;
+  border-radius: 50%;
+  line-height: 1;
+}
+
+.pulse-cart-item__name {
+  flex: 1;
+  font-weight: 500;
+  color: #0f1111;
+  line-height: 1.4;
+}
+
+/* Subtotal + buy button */
+.pulse-cart-subtotal {
+  padding: 18px 24px;
+  background: #f7fafa;
+}
+
+.pulse-cart-subtotal__row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-bottom: 14px;
+  font-size: 18px;
+}
+
+.pulse-cart-subtotal__label {
+  font-size: 15px;
+  color: #0f1111;
+}
+
+.pulse-cart-subtotal__amount {
+  font-size: 20px;
+  font-weight: 700;
+  color: #0f1111;
+}
+
+/* Native-looking Amazon yellow "Proceed to Buy" button */
+.pulse-cart-buy-btn {
+  display: block;
+  width: 100%;
+  max-width: 300px;
+  margin-left: auto;
+  padding: 11px 18px;
+  font-family: "Amazon Ember", Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: #0f1111;
+  background: #ffd814;
+  border: 1px solid #c7a600;
+  border-radius: 8px;
+  cursor: pointer;
+  letter-spacing: 0.01em;
+  text-align: center;
+  box-shadow: 0 2px 5px rgba(213, 217, 217, 0.5);
+  transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.pulse-cart-buy-btn:hover {
+  background: #f7ca00;
+  border-color: #b8960a;
+  box-shadow: 0 2px 8px rgba(199, 166, 0, 0.4);
+}
+
+.pulse-cart-buy-btn:active {
+  background: #ddb200;
+  transform: scale(0.99);
+}
+
+/* ── Order Confirmation Screen ────────────────────────────────────────────── */
+
+#pulse-order-confirmation {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 32px 16px;
+  background: #f0f2f2;
+  font-family: "Amazon Ember", Arial, sans-serif;
+  box-sizing: border-box;
+}
+
+.pulse-confirm__card {
+  width: 100%;
+  max-width: 560px;
+  background: #ffffff;
+  border: 1px solid #dde3ea;
+  border-radius: 8px;
+  padding: 40px 48px;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(35, 47, 62, 0.1);
+  animation: pulse-confirm-fade-in 0.4s ease both;
+}
+
+@keyframes pulse-confirm-fade-in {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+
+/* Green checkmark SVG */
+.pulse-confirm__check-wrap {
+  margin: 0 auto 24px;
+  width: 72px;
+  height: 72px;
+}
+
+.pulse-confirm__check-svg {
+  width: 72px;
+  height: 72px;
+  display: block;
+}
+
+/* Animate the tick drawing in */
+.pulse-confirm__check-tick {
+  stroke-dasharray: 35;
+  stroke-dashoffset: 35;
+  animation: pulse-tick-draw 0.45s 0.3s ease forwards;
+}
+
+@keyframes pulse-tick-draw {
+  to { stroke-dashoffset: 0; }
+}
+
+/* Title */
+.pulse-confirm__title {
+  margin: 0 0 12px;
+  font-size: 26px;
+  font-weight: 700;
+  color: #0f1111;
+  line-height: 1.3;
+}
+
+/* Sub-text */
+.pulse-confirm__sub {
+  margin: 0 0 24px;
+  font-size: 15px;
+  color: #565959;
+  line-height: 1.6;
+}
+
+/* Order number box */
+.pulse-confirm__order-box {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 16px;
+  padding: 12px 24px;
+  background: #f7fafa;
+  border: 1px solid #dde3ea;
+  border-radius: 8px;
+}
+
+.pulse-confirm__order-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #565959;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+.pulse-confirm__order-number {
+  font-size: 17px;
+  font-weight: 700;
+  color: #067d62;
+  letter-spacing: 0.02em;
+}
+
+/* Bundle summary line */
+.pulse-confirm__bundle-name {
+  margin-bottom: 32px;
+  font-size: 14px;
+  color: #565959;
+}
+
+.pulse-confirm__bundle-name strong {
+  color: #0f1111;
+}
+
+/* Return to Tez button */
+.pulse-confirm__return-btn {
+  display: inline-block;
+  padding: 11px 28px;
+  font-family: "Amazon Ember", Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: #0f1111;
+  background: #ffd814;
+  border: 1px solid #c7a600;
+  border-radius: 8px;
+  cursor: pointer;
+  letter-spacing: 0.01em;
+  box-shadow: 0 2px 5px rgba(213, 217, 217, 0.5);
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.pulse-confirm__return-btn:hover {
+  background: #f7ca00;
+  border-color: #b8960a;
+}
+
+.pulse-confirm__return-btn:active {
+  background: #ddb200;
+  transform: scale(0.98);
+}
+
+/* ── Predictive Stockout: 1-Tap Restock button ───────────────────────────── */
+
+.amazon-pulse-restock-btn {
+  display: block;
+  width: 100%;
+  margin-top: 12px;
+  padding: 9px 14px;
+  font-family: "Amazon Ember", Arial, sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f1111;
+  background: #ffd814;
+  border: 1px solid #c7a600;
+  border-radius: 8px;
+  cursor: pointer;
+  letter-spacing: 0.01em;
+  box-shadow: 0 1px 3px rgba(199, 166, 0, 0.3);
+  transition: background 0.15s ease, color 0.15s ease,
+              border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.amazon-pulse-restock-btn:hover:not(:disabled) {
+  background: #f7ca00;
+  border-color: #b8960a;
+}
+
+.amazon-pulse-restock-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.9;
+}
+
+/* ── Frictionless 1-Tap: mini receipt card ───────────────────────────────── */
+
+.amazon-pulse-receipt {
+  padding: 10px 12px;
+  background: #ffffff;
+  border: 1px solid #dde3ea;
+  border-left: 3px solid #067d62;
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.amazon-pulse-receipt__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.amazon-pulse-receipt__label {
+  font-size: 10px;
+  font-weight: 700;
+  color: #565959;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+.amazon-pulse-receipt__badge {
+  font-size: 10px;
+  padding: 3px 7px;
+}
+
+.amazon-pulse-receipt__title {
+  margin: 0 0 4px;
+  font-weight: 600;
+  color: #0f1111;
+  line-height: 1.4;
+  /* clamp to 2 lines so a long title doesn't blow out the sidebar */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.amazon-pulse-receipt__price {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: #b12704;
+}
+
+/* ── Frictionless 1-Tap: Zero-Search Predictive Card ─────────────────────── */
+
+.amazon-pulse-predict-hint {
+  margin: 0 0 10px;
+  font-size: 12px;
+  font-style: italic;
+  color: #565959;
+  line-height: 1.45;
+}
+
+.amazon-pulse-predict-card {
+  padding: 12px;
+  background: #ffffff;
+  border: 1px solid #dde3ea;
+  border-left: 3px solid #00a8a8;
+  border-radius: 8px;
+}
+
+.amazon-pulse-predict-card__body {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.amazon-pulse-predict-card__info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+  min-width: 0;
+}
+
+.amazon-pulse-predict-card__name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0f1111;
+  line-height: 1.3;
+}
+
+.amazon-pulse-predict-card__price {
+  font-size: 16px;
+  font-weight: 700;
+  color: #b12704;
+}
+
+.amazon-pulse-predict-card__vector-badge {
+  flex-shrink: 0;
+  font-size: 10px;
+  padding: 3px 7px;
+  margin-top: 2px;
+}
+
+/* Auto-Buy button: yellow → goes green on click */
+.amazon-pulse-auto-buy-btn {
+  display: block;
+  width: 100%;
+  padding: 10px 14px;
+  font-family: "Amazon Ember", Arial, sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f1111;
+  background: #ffd814;
+  border: 1px solid #c7a600;
+  border-radius: 8px;
+  cursor: pointer;
+  letter-spacing: 0.01em;
+  box-shadow: 0 1px 3px rgba(199, 166, 0, 0.3);
+  transition: background 0.15s ease, color 0.15s ease,
+              border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.amazon-pulse-auto-buy-btn:hover:not(:disabled) {
+  background: #f7ca00;
+  border-color: #b8960a;
+  box-shadow: 0 2px 6px rgba(199, 166, 0, 0.4);
+}
+
+.amazon-pulse-auto-buy-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.9;
+}
+
+/* ── Cart: Remove button ─────────────────────────────────────────────────── */
+
+.pulse-cart-item {
+  /* override the previous rule to accommodate the remove button */
+  align-items: center;
+}
+
+.pulse-cart-item__remove {
+  flex-shrink: 0;
+  margin-left: auto;
+  padding: 4px 10px;
+  font-family: "Amazon Ember", Arial, sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: #c40000;
+  background: transparent;
+  border: 1px solid #c40000;
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.pulse-cart-item__remove:hover {
+  background: #c40000;
+  color: #ffffff;
+}
+
+.pulse-cart-item__remove:active {
+  background: #a00000;
+  border-color: #a00000;
+  color: #ffffff;
+}
+
+/* ── Cart: Empty state (after last item removed) ─────────────────────────── */
+
+.pulse-cart-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px;
+  text-align: center;
+}
+
+.pulse-cart-empty-state__icon {
+  font-size: 48px;
+  line-height: 1;
+  margin-bottom: 16px;
+  opacity: 0.35;
+}
+
+.pulse-cart-empty-state__title {
+  margin: 0 0 8px;
+  font-size: 20px;
+  font-weight: 700;
+  color: #0f1111;
+}
+
+.pulse-cart-empty-state__sub {
+  margin: 0;
+  font-size: 14px;
+  color: #565959;
+  line-height: 1.5;
 }

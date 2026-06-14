@@ -7,7 +7,7 @@
 // and message routing between content scripts and the backend.
 // ═══════════════════════════════════════════════════════════════════════════
 
-const API_BASE = "http://localhost:8000";
+const API_BASE = "https://amazonpulse-1.onrender.com";
 
 chrome.runtime.onInstalled.addListener(() => {
   console.log("[Pulse] Extension installed — background worker active.");

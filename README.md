@@ -86,7 +86,7 @@ pip install -r requirements.txt
 python main.py
 ```
 
-Server runs at `http://localhost:8000`. Health check: `http://localhost:8000/health`
+Server runs at `https://amazonpulse-1.onrender.com`. Health check: `https://amazonpulse-1.onrender.com/health`
 
 ### Extension
 

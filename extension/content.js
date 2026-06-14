@@ -283,7 +283,7 @@
 
   const CARD_SELECTOR = 'div[role="button"][tabindex="0"]';
 
-  const API_BASE = "http://localhost:8000";
+  const API_BASE = "https://amazonpulse-1.onrender.com";
 
   const USER_ID = "user_123";
 

@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "description": "Intent-driven shopping with NLP graph traversal, predictive stockout alerts, and frictionless 1-tap checkout for Amazon Tez.",
   "permissions": ["storage", "activeTab"],
-  "host_permissions": ["*://*.amazon.in/*", "http://localhost:8000/*"],
+  "host_permissions": ["*://*.amazon.in/*", "https://amazonpulse-1.onrender.com/*"],
   "background": {
     "service_worker": "background.js"
   },

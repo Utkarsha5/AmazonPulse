@@ -4,6 +4,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from schemas import (
     CheckoutRequest,
     CheckoutResponse,
+    ContextTriggerRequest,
+    ContextTriggerResponse,
     FrictionlessAddRequest,
     FrictionlessAddResponse,
     FrictionlessResponse,
@@ -16,6 +18,7 @@ from services import (
     get_frictionless_recommendation,
     predict_stockout,
     process_checkout,
+    resolve_context_trigger,
     resolve_intent,
 )
 
@@ -61,7 +64,9 @@ async def frictionless_route(user_id: str) -> FrictionlessResponse:
 
 
 @app.post("/api/v1/frictionless/add", response_model=FrictionlessAddResponse)
-async def frictionless_add_route(payload: FrictionlessAddRequest) -> FrictionlessAddResponse:
+async def frictionless_add_route(
+    payload: FrictionlessAddRequest,
+) -> FrictionlessAddResponse:
     """1-tap add from scraped Tez product card (title + price)."""
     return await frictionless_add(payload.user_id, payload.title, payload.price)
 
@@ -72,18 +77,20 @@ async def checkout_route(payload: CheckoutRequest) -> CheckoutResponse:
     return await process_checkout(payload.user_id, payload.title, payload.price)
 
 
+@app.post("/api/v1/context/trigger", response_model=ContextTriggerResponse)
+async def context_trigger_route(
+    payload: ContextTriggerRequest,
+) -> ContextTriggerResponse:
+    """Zero-Search Context Engine: Returns bundles based on time/weather."""
+    bundle = await resolve_context_trigger(
+        payload.current_hour, payload.weather_condition
+    )
+    if bundle:
+        return ContextTriggerResponse(success=True, trigger_found=True, data=bundle)
+    return ContextTriggerResponse(success=True, trigger_found=False)
+
+
 if __name__ == "__main__":
     import uvicorn
 
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
-
-from schemas import ContextTriggerRequest, ContextTriggerResponse
-from services import resolve_context_trigger
-
-@app.post("/api/v1/context/trigger", response_model=ContextTriggerResponse)
-async def context_trigger_route(payload: ContextTriggerRequest) -> ContextTriggerResponse:
-    """Zero-Search Context Engine: Returns bundles based on time/weather."""
-    bundle = await resolve_context_trigger(payload.current_hour, payload.weather_condition)
-    if bundle:
-        return ContextTriggerResponse(success=True, trigger_found=True, data=bundle)
-    return ContextTriggerResponse(success=True, trigger_found=False)

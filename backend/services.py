@@ -1,4 +1,5 @@
 from mock_data import (
+    CONTEXT_BUNDLES,
     FRICTIONLESS_LOYALTY_VECTORS,
     INTENT_BUNDLES,
     INTENT_MATCH_ORDER,
@@ -89,7 +90,11 @@ async def predict_stockout(user_id: str) -> StockoutAlertResponse:
         pin_code=profile["pin_code"],
         pin_code_aggregates=aggregates,
         alert_message=profile["alert_message"],
-        model_tags=["time_series_cadence", "collaborative_filtering", "pin_code_aggregate"],
+        model_tags=[
+            "time_series_cadence",
+            "collaborative_filtering",
+            "pin_code_aggregate",
+        ],
     )
 
 
@@ -97,7 +102,9 @@ def _generate_order_id(user_id: str, title: str, price: str) -> str:
     return f"PULSE-{user_id.upper()}-{abs(hash(title + price)) % 100000:05d}"
 
 
-async def frictionless_add(user_id: str, title: str, price: str) -> FrictionlessAddResponse:
+async def frictionless_add(
+    user_id: str, title: str, price: str
+) -> FrictionlessAddResponse:
     order_id = _generate_order_id(user_id, title, price)
     return FrictionlessAddResponse(
         success=True,
@@ -132,16 +139,21 @@ async def get_frictionless_recommendation(user_id: str) -> FrictionlessResponse:
         brand_loyalty_scores=profile["brand_loyalty_scores"],
         personalization_vector_summary=profile["personalization_vector_summary"],
         rationale=profile["rationale"],
-        model_tags=["implicit_feedback", "personalization_vectors", "one_tap_resolution"],
+        model_tags=[
+            "implicit_feedback",
+            "personalization_vectors",
+            "one_tap_resolution",
+        ],
     )
-    
-from mock_data import CONTEXT_BUNDLES
+
 
 async def resolve_context_trigger(hour: int, weather: str) -> dict | None:
-    # Weather takes priority in our demo
+    """Weather takes priority; falls back to time-of-day bundles."""
+    # Clamp hour to valid range
+    hour = max(0, min(23, hour))
+
     if weather.lower() in ["rain", "raining"]:
         return CONTEXT_BUNDLES["rain"]
-    # Fallback to time-of-day
     if 6 <= hour <= 10:
         return CONTEXT_BUNDLES["morning"]
     return None

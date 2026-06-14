@@ -5,9 +5,9 @@
   // ── Cart page override ─────────────────────────────────────────────────────
   // When the extension loads on the Amazon cart page, inject the Pulse synced
   // cart UI instead of running the normal Tez sidebar logic.
- if (window.location.href.includes("cart/view") || window.location.href.includes("tez/browse/cart")) {
+  const isCartPage = window.location.href.includes("cart/view") || window.location.href.includes("tez/browse/cart");
+  if (isCartPage) {
     overrideAmazonCart();
-    return;
   }
 
   /**
@@ -23,13 +23,13 @@
     chrome.storage.local.get("pulseSyncCart", (result) => {
       const initialCart = result.pulseSyncCart;
 
-      // 2. Safely hide Amazon's "Empty Basket" without breaking React
+      // 2. Style to ensure our cart sits cleanly above Amazon's content
       const suppressStyle = document.createElement("style");
       suppressStyle.id = "amazon-pulse-cart-suppress";
       suppressStyle.textContent = `
-        /* Safely hide the empty basket container using CSS instead of deleting nodes */
-        div:has(> img[alt="Empty Basket"]) {
-          display: none !important;
+        #pulse-cart-override {
+          background: #ffffff;
+          margin-bottom: 12px;
         }
       `;
       document.head.appendChild(suppressStyle);
@@ -37,8 +37,7 @@
       // 3. Create the stable wrapper once
       const wrapper = document.createElement("div");
       wrapper.id = "pulse-cart-override";
-      // Using Flexbox to integrate cleanly into the Tez layout
-      wrapper.style.cssText = "width: 100%; position: relative; padding: 16px; box-sizing: border-box; background: transparent; z-index: 10;";
+      wrapper.style.cssText = "width: 100%; padding: 0; box-sizing: border-box; background: #ffffff;";
 
       // Renders (or re-renders) the cart contents into wrapper.
       function renderPulseCart(cart) {
@@ -168,34 +167,53 @@
       // Initial render
       renderPulseCart(initialCart);
 
-      // ── 4. Inject safely into #scrollableMainBody without destroying React ───────────
-      const POLL_INTERVAL_MS = 50;
-      const POLL_TIMEOUT_MS  = 5000;
-      const startTime = Date.now();
+      // ── 4. Inject inside #scrollableMainBody ───────────────────────────────────
+      // Amazon's React app mounts #scrollableMainBody asynchronously.
+      // Poll every 100ms until it appears, then prepend our cart above existing content.
+      let cartPollStopped = false;
+      const pollForTarget = setInterval(() => {
+        if (cartPollStopped) {
+          clearInterval(pollForTarget);
+          return;
+        }
 
-      const tryInjectCart = setInterval(() => {
-        const targetContainer = document.getElementById("scrollableMainBody");
+        // Stop if we navigated away from the cart page (SPA)
+        if (!window.location.href.includes("cart/view") && !window.location.href.includes("tez/browse/cart")) {
+          clearInterval(pollForTarget);
+          // Remove our cart UI if it was already injected
+          const existing = document.getElementById("pulse-cart-override");
+          if (existing) existing.remove();
+          const suppressEl = document.getElementById("amazon-pulse-cart-suppress");
+          if (suppressEl) suppressEl.remove();
+          return;
+        }
 
-        if (targetContainer) {
-          // Check if we already injected to prevent duplicates
-          if (!document.getElementById("pulse-cart-override")) {
-            
-            // 🚨 CRITICAL FIX: We use prepend() to add our cart AT THE TOP
-            // We DO NOT use targetContainer.innerHTML = '' anymore!
-            targetContainer.prepend(wrapper);
-            
-            console.log("[Amazon Pulse] Safely prepended custom cart into #scrollableMainBody");
-          }
-          clearInterval(tryInjectCart); // Found and injected, stop polling
-        } 
-        // Fallback
-        else if (Date.now() - startTime > POLL_TIMEOUT_MS) {
-          clearInterval(tryInjectCart);
-          if (!document.getElementById("pulse-cart-override")) {
+        // Already injected? Stop.
+        if (document.getElementById("pulse-cart-override")) {
+          clearInterval(pollForTarget);
+          return;
+        }
+
+        const target = document.getElementById("scrollableMainBody");
+        if (target) {
+          target.prepend(wrapper); // Prepend above existing cart content
+          clearInterval(pollForTarget);
+          console.log("[Amazon Pulse] Injected Pulse cart inside #scrollableMainBody");
+        }
+      }, 100);
+
+      // Safety timeout: if #scrollableMainBody never appears after 15s, inject into body
+      setTimeout(() => {
+        clearInterval(pollForTarget);
+        cartPollStopped = true;
+        if (!document.getElementById("pulse-cart-override")) {
+          // Only inject if still on cart page
+          if (window.location.href.includes("cart/view") || window.location.href.includes("tez/browse/cart")) {
             document.body.prepend(wrapper);
+            console.log("[Amazon Pulse] Fallback: injected into document.body");
           }
         }
-      }, POLL_INTERVAL_MS);
+      }, 15000);
 
     });
   }
@@ -292,8 +310,6 @@
 
   const CARD_SELECTOR = 'div[role="button"][tabindex="0"]';
 
-  const API_BASE = "http://localhost:8000";
-
   const USER_ID = "user_123";
 
 
@@ -302,59 +318,38 @@
 
     try {
 
-      const response = await fetch(`${API_BASE}${path}`, {
-
-        headers: {
-
-          "Content-Type": "application/json",
-
-          ...(options.headers || {}),
-
-        },
-
-        ...options,
-
+      const response = await new Promise((resolve, reject) => {
+        chrome.runtime.sendMessage(
+          { type: "API_FETCH", payload: { path, options } },
+          (resp) => {
+            if (chrome.runtime.lastError) {
+              reject(new Error(chrome.runtime.lastError.message));
+              return;
+            }
+            if (!resp) {
+              reject(new Error("No response from background script — extension may have reloaded."));
+              return;
+            }
+            resolve(resp);
+          }
+        );
       });
 
-
-
-      if (!response.ok) {
-
-        let detail = response.statusText;
-
-        try {
-
-          const errorBody = await response.json();
-
-          detail = errorBody.detail || JSON.stringify(errorBody);
-
-        } catch {
-
-          detail = await response.text();
-
-        }
-
-        throw new Error(`Request failed (${response.status}): ${detail}`);
-
+      if (!response.success) {
+        throw new Error(response.error || "Unknown API error");
       }
 
-
-
-      return await response.json();
+      return response.data;
 
     } catch (error) {
 
-      if (error instanceof TypeError) {
-
-        throw new Error(
-
-          "Cannot reach Amazon Pulse backend. Start it with: python main.py (localhost:8000)"
-
-        );
-
+      if (error.message && error.message.includes("Cannot reach")) {
+        throw error;
       }
 
-      throw error;
+      throw new Error(
+        error.message || "Cannot reach Amazon Pulse backend. Start it with: python main.py (localhost:8000)"
+      );
 
     }
 
@@ -1198,7 +1193,15 @@
           user_id: "hackathon_demo_user"
         }
       }, (response) => {
-        
+        // Check for extension context invalidation
+        if (chrome.runtime.lastError) {
+          console.warn("[Amazon Pulse] Message failed:", chrome.runtime.lastError.message);
+          btn.innerHTML = `✅ Order Confirmed (Demo)!`;
+          btn.style.background = "linear-gradient(135deg, #059669 0%, #047857 100%)";
+          btn.style.boxShadow = "0 4px 10px rgba(5, 150, 105, 0.4)";
+          return;
+        }
+
         // Handle the response from your Python backend
         if (response && response.success) {
           btn.innerHTML = `✅ Ordered! (ID: ${response.data.order_id})`;
@@ -1470,7 +1473,11 @@
 
     setupFrictionlessCard();
 
-    chrome.runtime.sendMessage({ type: "PULSE_UI_READY", url: location.href });
+    chrome.runtime.sendMessage({ type: "PULSE_UI_READY", url: location.href }, () => {
+      if (chrome.runtime.lastError) {
+        console.warn("[Amazon Pulse] Could not notify background:", chrome.runtime.lastError.message);
+      }
+    });
 
   }
 
@@ -1600,14 +1607,12 @@
     }
   });
   // ──────────────────────────────────────────────────────────────────────────
-  if (document.body) {
-
-    init();
-
-  } else {
-
-    document.addEventListener("DOMContentLoaded", init, { once: true });
-
+  if (!isCartPage) {
+    if (document.body) {
+      init();
+    } else {
+      document.addEventListener("DOMContentLoaded", init, { once: true });
+    }
   }
   // ── SPA Route Watcher (Fixes Sticky Elements on Back Navigation) ──────────
   let lastUrl = window.location.href;
@@ -1617,29 +1622,44 @@
       lastUrl = window.location.href;
       console.log("[Pulse SPA Watcher] Route shifted to:", lastUrl);
       
-      // If we left the cart page and returned to the browse/home page:
-      if (!window.location.href.includes("cart")) {
+      const nowOnCart = window.location.href.includes("cart/view") || window.location.href.includes("tez/browse/cart");
+
+      if (nowOnCart) {
+        // Navigated TO cart page — show Pulse cart, remove sidebar
+        console.log("[Pulse SPA Watcher] Entered cart page.");
+        const sidebar = document.querySelector(".amazon-pulse-sidebar");
+        if (sidebar) sidebar.remove();
+        // Only override if not already showing
+        if (!document.getElementById("pulse-cart-override")) {
+          overrideAmazonCart();
+        }
+      } else {
+        // Left cart page — clean up and restore sidebar
         console.log("[Pulse SPA Watcher] Left cart page. Cleaning up UI...");
         
-        // 1. Remove the custom cart view or order confirmation screens
-        // (Targets common element classes/IDs used in our overrides)
+        // 1. Remove the Pulse cart override
+        const pulseCartOverride = document.getElementById("pulse-cart-override");
+        if (pulseCartOverride) pulseCartOverride.remove();
+
+        // 2. Remove the custom cart view or order confirmation screens
         const customCartUI = document.getElementById("pulse-cart-wrapper") || 
                              document.querySelector(".amazon-pulse-cart-container") ||
-                             document.querySelector("[style*='z-index: 2147483647']"); // Catch full screen overlays
+                             document.querySelector("[style*='z-index: 2147483647']");
         
         if (customCartUI && !customCartUI.classList.contains("amazon-pulse-sidebar")) {
           customCartUI.remove();
         }
 
-        // 2. Unsuppress standard Amazon styles (re-enable normal visibility)
+        // 3. Unsuppress standard Amazon styles
         const hiddenStyles = document.getElementById("amazon-pulse-cart-suppress");
         if (hiddenStyles) {
           hiddenStyles.remove();
         }
 
-        // 3. Bring back the clean sidebar control center for the browse page
+        // 4. Bring back the clean sidebar control center for the browse page
         injectPulseSidebar();
+        enhanceAllProductCards();
       }
     }
-  }, 300); // Checks every 300ms for seamless response latency
+  }, 300);
 })();

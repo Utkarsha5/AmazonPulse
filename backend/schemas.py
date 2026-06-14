@@ -4,15 +4,19 @@ from pydantic import BaseModel, Field
 class IntentResolveRequest(BaseModel):
     query: str = Field(..., min_length=1, examples=["Bake a cake"])
 
+
 class ContextTriggerRequest(BaseModel):
     user_id: str = Field(default="demo_user")
-    current_hour: int
+    current_hour: int = Field(..., ge=0, le=23)
     weather_condition: str = Field(default="clear")
+
 
 class ContextTriggerResponse(BaseModel):
     success: bool
     trigger_found: bool
     data: dict | None = None
+
+
 class CartItem(BaseModel):
     sku: str
     title: str

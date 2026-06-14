@@ -841,7 +841,7 @@
     primaryBundleEl.innerHTML = `
       <div class="amazon-pulse-result__header">
         <span class="amazon-pulse-badge amazon-pulse-badge--teal">
-          ${formatConfidence(data.confidence)} GNN Match
+          ${formatConfidence(data.confidence)} match
         </span>
         <span class="amazon-pulse-result__label">${escapeHtml(data.matched_keyword)}</span>
       </div>
@@ -951,9 +951,9 @@
 
     button.disabled = true;
 
-    button.textContent = "Resolving…";
+    button.textContent = "Finding…";
 
-    results.innerHTML = `<p class="amazon-pulse-loading">Traversing NLP graph…</p>`;
+    results.innerHTML = `<p class="amazon-pulse-loading">Building your perfect bundle…</p>`;
 
 
 
@@ -979,7 +979,7 @@
 
       button.disabled = false;
 
-      button.textContent = "Resolve Intent";
+      button.textContent = "Find My Bundle";
 
     }
 
@@ -1299,7 +1299,7 @@
 
           <h2 class="amazon-pulse-sidebar__module-title">
 
-            ✨ Intent Engine <span class="amazon-pulse-sidebar__module-tag">(NLP + GNN Graph Traversal)</span>
+            ✨ Smart Bundle <span class="amazon-pulse-sidebar__module-tag">What are you up to?</span>
 
           </h2>
 
@@ -1323,7 +1323,7 @@
 
               <button id="amazon-pulse-intent-btn" type="button" class="amazon-pulse-btn amazon-pulse-btn--primary">
 
-                Resolve Intent
+                Find My Bundle
 
               </button>
 
@@ -1341,7 +1341,7 @@
 
           <h2 class="amazon-pulse-sidebar__module-title">
 
-            🔔 Predictive Restock <span class="amazon-pulse-sidebar__module-tag">(Time-Series + Collaborative Filtering)</span>
+            🔔 Running Low? <span class="amazon-pulse-sidebar__module-tag">We predict what you need next</span>
 
           </h2>
 
@@ -1359,14 +1359,14 @@
 
           <h2 class="amazon-pulse-sidebar__module-title">
 
-            ⚡ Zero-Friction Buy <span class="amazon-pulse-sidebar__module-tag">(Implicit Personalization Vectors)</span>
+            ⚡ Quick Restock <span class="amazon-pulse-sidebar__module-tag">Your top pick, one tap away</span>
 
           </h2>
 
           <div id="amazon-pulse-frictionless-content" class="amazon-pulse-sidebar__module-content">
 
             <p class="amazon-pulse-predict-hint">
-              Based on your 14-day cycle, you usually restock this today.
+              You usually buy this around now. One tap and it's in your cart.
             </p>
 
             <div class="amazon-pulse-predict-card" id="amazon-pulse-predict-card">
@@ -1376,7 +1376,7 @@
                   <span class="amazon-pulse-predict-card__price">₹190</span>
                 </div>
                 <span class="amazon-pulse-badge amazon-pulse-badge--teal amazon-pulse-predict-card__vector-badge">
-                  🧠 Vector Match
+                  🧠 Predicted
                 </span>
               </div>
               <button

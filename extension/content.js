@@ -267,11 +267,10 @@
     });
 
     // Swap the entire page body content for the confirmation screen
-    // Keeping <head> intact so Amazon's own fonts/styles still apply
     document.body.innerHTML = "";
     document.body.appendChild(screen);
     document.body.style.cssText =
-      "margin:0;padding:0;background:#f0f2f2;min-height:100vh;";
+      "margin:0;padding:0;background:#f0f2f2;min-height:100vh;display:flex;align-items:center;justify-content:center;";
   }
 
 

@@ -134,3 +134,14 @@ async def get_frictionless_recommendation(user_id: str) -> FrictionlessResponse:
         rationale=profile["rationale"],
         model_tags=["implicit_feedback", "personalization_vectors", "one_tap_resolution"],
     )
+    
+from mock_data import CONTEXT_BUNDLES
+
+async def resolve_context_trigger(hour: int, weather: str) -> dict | None:
+    # Weather takes priority in our demo
+    if weather.lower() in ["rain", "raining"]:
+        return CONTEXT_BUNDLES["rain"]
+    # Fallback to time-of-day
+    if 6 <= hour <= 10:
+        return CONTEXT_BUNDLES["morning"]
+    return None

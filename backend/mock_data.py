@@ -240,3 +240,19 @@ FRICTIONLESS_LOYALTY_VECTORS: dict[str, dict] = {
         "rationale": "Dairy staple dominates historical basket vectors — optimal 1-tap replenishment candidate.",
     },
 }
+CONTEXT_BUNDLES: dict[str, dict] = {
+    "rain": {
+        "trigger_condition": "weather == 'rain'",
+        "message": "🌧️ Looks like rain! Perfect time for Pakodas.",
+        "bundle_name": "Monsoon Magic Bundle",
+        "price_inr": 350,
+        "items": ["Besan 500g", "Tata Salt 1kg", "Catch Chat Masala", "Fortune Sunflower Oil 1L"]
+    },
+    "morning": {
+        "trigger_condition": "hour >= 6 and hour <= 10",
+        "message": "🌅 Good morning! Running low on breakfast essentials?",
+        "bundle_name": "Morning Rush Pack",
+        "price_inr": 180,
+        "items": ["Amul Milk 1L", "Britannia Brown Bread", "Eggs (6 pack)"]
+    }
+}

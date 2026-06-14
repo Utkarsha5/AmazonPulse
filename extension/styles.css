@@ -1067,36 +1067,73 @@
   margin-top: 2px;
 }
 
-/* Auto-Buy button: yellow → goes green on click */
+/* ── Distinct Pulse 1-Tap Button ───────────────────────────────────────── */
+
+@keyframes pulse-glow {
+  0% {
+    box-shadow: 0 0 0 0 rgba(0, 168, 168, 0.6);
+  }
+  70% {
+    box-shadow: 0 0 0 8px rgba(0, 168, 168, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(0, 168, 168, 0);
+  }
+}
+
 .amazon-pulse-auto-buy-btn {
-  display: block;
   width: 100%;
-  padding: 10px 14px;
-  font-family: "Amazon Ember", Arial, sans-serif;
-  font-size: 13px;
-  font-weight: 700;
-  color: #0f1111;
-  background: #ffd814;
-  border: 1px solid #c7a600;
-  border-radius: 8px;
+  margin-top: 10px;
+  padding: 12px 14px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 800;
+  color: #ffffff;
+  /* Use a premium Teal-to-Blue gradient to stand out from Amazon Yellow */
+  background: linear-gradient(135deg, #00a8a8 0%, #007a87 100%);
+  border: none;
+  border-radius: 24px; /* Pill shape sets it apart from Amazon's rectangular buttons */
   cursor: pointer;
-  letter-spacing: 0.01em;
-  box-shadow: 0 1px 3px rgba(199, 166, 0, 0.3);
-  transition: background 0.15s ease, color 0.15s ease,
-              border-color 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: 0 4px 10px rgba(0, 168, 168, 0.3);
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s ease;
+  animation: pulse-glow 2s infinite; /* The "Pulse" effect */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
 }
 
 .amazon-pulse-auto-buy-btn:hover:not(:disabled) {
-  background: #f7ca00;
-  border-color: #b8960a;
-  box-shadow: 0 2px 6px rgba(199, 166, 0, 0.4);
+  background: linear-gradient(135deg, #00c4c4 0%, #008f8f 100%);
+  box-shadow: 0 6px 14px rgba(0, 168, 168, 0.5);
+  transform: translateY(-2px); /* Slight lift on hover */
+}
+
+.amazon-pulse-auto-buy-btn:active:not(:disabled) {
+  transform: translateY(1px);
+  box-shadow: 0 2px 5px rgba(0, 168, 168, 0.4);
 }
 
 .amazon-pulse-auto-buy-btn:disabled {
   cursor: not-allowed;
-  opacity: 0.9;
+  background: #a6cdd2;
+  animation: none;
+  box-shadow: none;
+  color: #ffffff;
 }
-
+.amazon-pulse-card-btn {
+  width: 100%;
+  margin-top: 8px; /* Adds breathing room below the price */
+  padding: 8px 10px; /* Slimmer padding for tiny Tez cards */
+  font-size: 13px; /* Slightly smaller text */
+  border-radius: 16px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
 /* ── Cart: Remove button ─────────────────────────────────────────────────── */
 
 .pulse-cart-item {
@@ -1162,3 +1199,26 @@
   color: #565959;
   line-height: 1.5;
 }
+/* ── Contextual Zero-Search Popup ──────────────────────────────────────── */
+.amazon-pulse-context-popup {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 320px;
+  background: #ffffff;
+  border-left: 4px solid #00a8a8;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  padding: 16px;
+  z-index: 2147483647;
+  font-family: "Amazon Ember", Arial, sans-serif;
+  animation: slide-up-fade 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slide-up-fade {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.pulse-context-title { font-weight: bold; font-size: 15px; margin-bottom: 4px; color: #0f1111; }
+.pulse-context-desc { font-size: 13px; color: #565959; margin-bottom: 12px; }

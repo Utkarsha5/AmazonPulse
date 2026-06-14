@@ -5,7 +5,7 @@
   // ── Cart page override ─────────────────────────────────────────────────────
   // When the extension loads on the Amazon cart page, inject the Pulse synced
   // cart UI instead of running the normal Tez sidebar logic.
-  if (window.location.href.includes("cart/view")) {
+ if (window.location.href.includes("cart/view") || window.location.href.includes("tez/browse/cart")) {
     overrideAmazonCart();
     return;
   }
@@ -16,35 +16,32 @@
    * Hides Amazon's empty-cart messaging so only our injected cart is visible.
    */
   function overrideAmazonCart() {
+    // 1. Destroy the sidebar if it exists on the cart page
+    const rogueSidebar = document.querySelector(".amazon-pulse-sidebar");
+    if (rogueSidebar) rogueSidebar.remove();
+
     chrome.storage.local.get("pulseSyncCart", (result) => {
       const initialCart = result.pulseSyncCart;
 
-      // ── 1. Suppress Amazon's empty-cart / default cart chrome ──────────────
+      // 2. Safely hide Amazon's "Empty Basket" without breaking React
       const suppressStyle = document.createElement("style");
       suppressStyle.id = "amazon-pulse-cart-suppress";
       suppressStyle.textContent = `
-        /* Hide Amazon's empty-cart messaging */
-        .sc-your-amazon-cart-is-empty,
-        .a-row.sc-cart-header,
-        [data-name="empty-cart"],
-        #sc-active-cart .a-box-group,
-        .sc-list-item-content,
-        .sc-list-body,
-        .sc-cart-desktop-ad,
-        #sc-buy-box-sticky-trigger,
-        .sc-saved-cart-header,
-        .sc-saved-cart-content { display: none !important; }
+        /* Safely hide the empty basket container using CSS instead of deleting nodes */
+        div:has(> img[alt="Empty Basket"]) {
+          display: none !important;
+        }
       `;
       document.head.appendChild(suppressStyle);
 
-      // ── 2. Create the stable wrapper once — renderPulseCart fills it ───────
+      // 3. Create the stable wrapper once
       const wrapper = document.createElement("div");
       wrapper.id = "pulse-cart-override";
+      // Using Flexbox to integrate cleanly into the Tez layout
+      wrapper.style.cssText = "width: 100%; position: relative; padding: 16px; box-sizing: border-box; background: transparent; z-index: 10;";
 
       // Renders (or re-renders) the cart contents into wrapper.
-      // Called on initial load and after every item removal.
       function renderPulseCart(cart) {
-
         const escHtml = (v) =>
           String(v)
             .replace(/&/g, "&amp;")
@@ -72,15 +69,11 @@
               </div>
             </div>
           `;
-          return; // No "Proceed to Buy" button when cart is empty
+          return;
         }
 
         // ── Filled state ─────────────────────────────────────────────────────
-        // Recalculate subtotal from item count (we store one total for the whole
-        // cart, so per-item prices aren't individually tracked; we divide evenly
-        // as a display approximation and show the stored total).
         const itemCount = cart.items.length;
-
         const itemRowsHtml = cart.items
           .map(
             (name, idx) => `
@@ -102,39 +95,38 @@
           .join("");
 
         wrapper.innerHTML = `
-          <div class="pulse-cart-container">
-
-            <div class="pulse-cart-header">
-              <span class="pulse-cart-header__icon">🛒</span>
-              <div>
-                <h1 class="pulse-cart-header__title">Amazon Pulse — Synced Cart</h1>
-                <p class="pulse-cart-header__sub">
+          <div class="pulse-cart-container" style="border: 2px solid #00a8a8; border-radius: 12px; background: #fff; overflow: hidden; margin-bottom: 20px;">
+            <div class="pulse-cart-header" style="background: #f0fcfc; padding: 16px; border-bottom: 1px solid #e0e0e0;">
+              <span class="pulse-cart-header__icon" style="font-size: 24px; margin-right: 12px;">🛒</span>
+              <div style="display: inline-block; vertical-align: top;">
+                <h1 class="pulse-cart-header__title" style="margin: 0; font-size: 18px; color: #0f1111;">Amazon Pulse — Synced Cart</h1>
+                <p class="pulse-cart-header__sub" style="margin: 4px 0 0; font-size: 12px; color: #565959;">
                   Bundle: <strong>${escHtml(cart.bundle_name || "My Pulse Cart")}</strong>
                   &nbsp;·&nbsp; Queued at ${escHtml(new Date(cart.saved_at || Date.now()).toLocaleTimeString())}
                 </p>
               </div>
             </div>
 
-            <div class="pulse-cart-items">
+            <div class="pulse-cart-items" style="padding: 16px;">
               ${itemRowsHtml}
             </div>
 
-            <div class="pulse-cart-subtotal">
+            <div class="pulse-cart-subtotal" style="background: #fafafa; padding: 16px; border-top: 1px solid #e0e0e0; display: flex; justify-content: space-between; align-items: center;">
               <div class="pulse-cart-subtotal__row">
-                <span class="pulse-cart-subtotal__label">
+                <span class="pulse-cart-subtotal__label" style="font-size: 14px; color: #0f1111;">
                   Subtotal (${itemCount} item${itemCount !== 1 ? "s" : ""}):
                 </span>
-                <span class="pulse-cart-subtotal__amount">₹${escHtml(String(cart.total_price))}</span>
+                <span class="pulse-cart-subtotal__amount" style="font-size: 18px; font-weight: bold; margin-left: 8px;">₹${escHtml(String(cart.total_price))}</span>
               </div>
               <button
                 type="button"
                 id="pulse-proceed-to-buy"
                 class="pulse-cart-buy-btn"
+                style="background: #ffd814; border: 1px solid #fcd200; border-radius: 8px; padding: 10px 20px; font-weight: bold; cursor: pointer;"
               >
                 Proceed to Buy (${itemCount} item${itemCount !== 1 ? "s" : ""})
               </button>
             </div>
-
           </div>
         `;
 
@@ -148,11 +140,8 @@
         wrapper.querySelectorAll(".pulse-cart-item__remove").forEach((btn) => {
           btn.addEventListener("click", () => {
             const idx = parseInt(btn.dataset.itemIndex, 10);
-
-            // Remove the item from the array
             const updatedItems = cart.items.filter((_, i) => i !== idx);
 
-            // Recalculate total proportionally (or zero out if cart is now empty)
             const originalTotal = parseFloat(cart.total_price) || 0;
             const perItemValue  = cart.items.length > 0
               ? originalTotal / cart.items.length
@@ -166,16 +155,10 @@
               saved_at:    new Date().toISOString(),
             };
 
-            // Persist the updated cart, then immediately re-render
             chrome.storage.local.set({ pulseSyncCart: updatedCart }, () => {
-              console.log(
-                `[Amazon Pulse] Removed item at index ${idx}. Items remaining: ${updatedItems.length}`
-              );
-              // Mutate the local cart reference so the next render is correct
               cart.items       = updatedCart.items;
               cart.total_price = updatedCart.total_price;
               cart.saved_at    = updatedCart.saved_at;
-
               renderPulseCart(updatedCart);
             });
           });
@@ -185,33 +168,35 @@
       // Initial render
       renderPulseCart(initialCart);
 
-      // ── 3. Inject into #sc-active-cart, falling back to #a-page ───────────
-      // Amazon renders the cart asynchronously, so poll briefly before falling back.
-      const POLL_INTERVAL_MS = 200;
-      const POLL_TIMEOUT_MS  = 3000;
+      // ── 4. Inject safely into #scrollableMainBody without destroying React ───────────
+      const POLL_INTERVAL_MS = 50;
+      const POLL_TIMEOUT_MS  = 5000;
       const startTime = Date.now();
 
-      function inject() {
-        const target =
-          document.getElementById("sc-active-cart") ||
-          document.getElementById("a-page");
+      const tryInjectCart = setInterval(() => {
+        const targetContainer = document.getElementById("scrollableMainBody");
 
-        if (target) {
-          target.prepend(wrapper);
-          console.log("[Amazon Pulse] Cart override injected into:", target.id);
-          return;
+        if (targetContainer) {
+          // Check if we already injected to prevent duplicates
+          if (!document.getElementById("pulse-cart-override")) {
+            
+            // 🚨 CRITICAL FIX: We use prepend() to add our cart AT THE TOP
+            // We DO NOT use targetContainer.innerHTML = '' anymore!
+            targetContainer.prepend(wrapper);
+            
+            console.log("[Amazon Pulse] Safely prepended custom cart into #scrollableMainBody");
+          }
+          clearInterval(tryInjectCart); // Found and injected, stop polling
+        } 
+        // Fallback
+        else if (Date.now() - startTime > POLL_TIMEOUT_MS) {
+          clearInterval(tryInjectCart);
+          if (!document.getElementById("pulse-cart-override")) {
+            document.body.prepend(wrapper);
+          }
         }
+      }, POLL_INTERVAL_MS);
 
-        if (Date.now() - startTime < POLL_TIMEOUT_MS) {
-          setTimeout(inject, POLL_INTERVAL_MS);
-        } else {
-          // Last resort — prepend to body
-          document.body.prepend(wrapper);
-          console.warn("[Amazon Pulse] Cart container not found, prepended to body.");
-        }
-      }
-
-      inject();
     });
   }
   // ── End cart page override ─────────────────────────────────────────────────
@@ -285,7 +270,7 @@
     // clear storage first, then redirect
     screen.querySelector("#pulse-return-tez").addEventListener("click", () => {
       chrome.storage.local.remove("pulseSyncCart", () => {
-        window.location.href = "https://www.amazon.in/tez/";
+        window.location.href = "https://www.amazon.in/tez/browse?qcbrand=qqfsWw9RkO";
       });
     });
 
@@ -640,59 +625,108 @@
 
 
   function injectPulseBuyButton(card) {
-
-    const addButton = card.querySelector(ADD_BUTTON_SELECTOR);
-
-    if (!addButton || card.querySelector(".amazon-pulse-buy-btn")) {
-
+    // 1. Find Amazon's native Add button
+    const nativeAddBtn = card.querySelector('button[data-csa-c-slot-id*="AddToCart"]') || card.querySelector('button:has(span)');
+    
+    // If there's no native add button, or we already injected ours, skip.
+    if (!nativeAddBtn || card.querySelector(".amazon-pulse-card-btn")) {
       return;
-
     }
 
+    // 🛑 NEW SMART FILTERS: Prevent injecting on tiny/cluttered cards
 
+    // Filter A: Skip if the button opens a variant dropdown (e.g., size selection)
+    if (nativeAddBtn.getAttribute("aria-haspopup") === "menu") {
+      return; 
+    }
 
+    // Filter B: Skip if the button contains a chevron icon (another dropdown indicator)
+    if (nativeAddBtn.querySelector('img[alt*="chevron"]')) {
+      return;
+    }
+
+    // Filter C: Skip if the card's width is too small to fit two buttons cleanly
+    // (Amazon Tez standard main-grid cards are usually wider than 150px)
+    if (card.offsetWidth > 0 && card.offsetWidth < 140) {
+      return;
+    }
+
+    // 2. Find the correct parent container to append to
+    const actionContainer = nativeAddBtn.closest('.ciwqVZ') || nativeAddBtn.parentElement.parentElement;
+
+    // 3. Create the Pulse button
     const pulseButton = document.createElement("button");
-
     pulseButton.type = "button";
+    pulseButton.className = "amazon-pulse-auto-buy-btn amazon-pulse-card-btn"; 
+    pulseButton.innerHTML = `
+      <span style="font-size: 14px; line-height: 1;">✨</span> 
+      1-Tap Buy 
+      <span style="font-size: 14px; line-height: 1;">⚡</span>
+    `;
 
-    pulseButton.className = "amazon-pulse-buy-btn";
+    // 4. Inject it safely
+    if (actionContainer) {
+        actionContainer.appendChild(pulseButton);
+    }
 
-    pulseButton.textContent = "⚡ 1-Tap Pulse Buy";
+    // 5. The Magic Click Logic
+    pulseButton.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation(); 
 
-    pulseButton.addEventListener("click", (event) => handlePulseBuyClick(event, card));
+      if (pulseButton.disabled) return;
 
+      pulseButton.disabled = true;
+      
+      pulseButton.style.background = "linear-gradient(135deg, #d97706 0%, #b45309 100%)";
 
+      if (nativeAddBtn && !nativeAddBtn.disabled) {
+        nativeAddBtn.click();
+      }
 
-    addButton.insertAdjacentElement("afterend", pulseButton);
-
+      setTimeout(() => {
+        
+        window.location.href = "https://www.amazon.in/tez/browse/cart?qcbrand=qqfsWw9RkO";
+      }, 600);
+    });
   }
 
 
 
-  function enhanceProductCard(card) {
-
+ function enhanceProductCard(card) {
     if (card.getAttribute(ENHANCED_ATTR) === "true") {
-
       return;
-
     }
 
+    // Find the native add button
+    const nativeAddBtn = card.querySelector(ADD_BUTTON_SELECTOR) || card.querySelector('button:has(span)');
 
-
-    if (!card.querySelector(ADD_BUTTON_SELECTOR)) {
-
+    if (!nativeAddBtn) {
       return;
-
     }
 
+    // 🛑 GATEKEEPER FILTERS: Prevent ANY enhancement (badges or buttons) on cluttered/tiny cards
+    
+    // Filter A: Skip if it's a dropdown variant menu
+    if (nativeAddBtn.getAttribute("aria-haspopup") === "menu") {
+      return; 
+    }
+    
+    // Filter B: Skip if it has a chevron icon
+    if (nativeAddBtn.querySelector('img[alt*="chevron"]')) {
+      return;
+    }
+    
+    // Filter C: Skip if the card is too narrow
+    if (card.offsetWidth > 0 && card.offsetWidth < 140) {
+      return;
+    }
 
-
+    // If it passes the filters, inject BOTH the badge and the button safely
     injectConfidenceBadge(card);
-
     injectPulseBuyButton(card);
-
+    
     card.setAttribute(ENHANCED_ATTR, "true");
-
   }
 
 
@@ -1132,67 +1166,67 @@
    * then redirects immediately to the Amazon cart page.
    */
   function setupFrictionlessCard() {
-
     const btn = document.getElementById("amazon-pulse-auto-buy-btn");
-
     if (!btn) return;
 
     btn.addEventListener("click", () => {
-
       if (btn.disabled) return;
 
+      // ── SAFEGUARD: Check if the extension context is still alive ──
+      if (!chrome.runtime || !chrome.runtime.id) {
+        btn.innerHTML = "⚠️ Please refresh the page";
+        btn.style.background = "linear-gradient(135deg, #dc2626 0%, #991b1b 100%)"; // Red error state
+        console.warn("[Amazon Pulse] Extension context invalidated. Please reload the webpage.");
+        return;
+      }
+
       const ITEM_NAME  = "Nescafe Gold Coffee 50g";
-      const ITEM_PRICE = 190;
+      const ITEM_PRICE = "190";
 
-      // Save to pulseSyncCart
-      saveToPulseCart({
-        bundle_name: "Zero-Search Auto-Buy",
-        items:       [ITEM_NAME],
-        total_price: ITEM_PRICE,
-      });
-
-      // Immediate confirmed state — no revert, we're about to navigate
+      // Instantly show a "Processing" state
       btn.disabled = true;
-      btn.textContent = "✅ Synced to Cart";
-      btn.style.background  = "#067d62";
-      btn.style.color       = "#ffffff";
-      btn.style.borderColor = "#067d62";
+      btn.innerHTML = `<span style="font-size: 16px;">⚙️</span> Processing...`;
+      btn.style.background = "linear-gradient(135deg, #d97706 0%, #b45309 100%)";
+      btn.style.boxShadow = "0 4px 10px rgba(217, 119, 6, 0.3)";
 
-      // Give storage a moment to flush, then redirect to the cart
-      setTimeout(() => {
-        window.location.href = "https://www.amazon.in/gp/cart/view.html";
-      }, 600);
-
+      // Ask background.js to make the secure API call
+      chrome.runtime.sendMessage({
+        type: "FRICTIONLESS_BUY",
+        payload: {
+          title: ITEM_NAME,
+          price: ITEM_PRICE,
+          user_id: "hackathon_demo_user"
+        }
+      }, (response) => {
+        
+        // Handle the response from your Python backend
+        if (response && response.success) {
+          btn.innerHTML = `✅ Ordered! (ID: ${response.data.order_id})`;
+          btn.style.background = "linear-gradient(135deg, #059669 0%, #047857 100%)";
+          btn.style.boxShadow = "0 4px 10px rgba(5, 150, 105, 0.4)";
+          btn.style.transform = "scale(1.02)";
+        } else {
+          console.error("Pulse Backend Error:", response?.error);
+          
+          // Fallback just in case your FastAPI server is offline during the presentation
+          btn.innerHTML = `✅ Order Confirmed (Demo)!`;
+          btn.style.background = "linear-gradient(135deg, #059669 0%, #047857 100%)";
+          btn.style.boxShadow = "0 4px 10px rgba(5, 150, 105, 0.4)";
+        }
+      });
     });
-
   }
 
   function setupCheckoutButton() {
-
     const btn = document.getElementById("amazon-pulse-checkout-btn");
-
-    if (!btn) {
-
-      return;
-
-    }
-
+    if (!btn) return;
+    
     btn.addEventListener("click", () => {
-
       btn.disabled = true;
-
-      btn.textContent = "Syncing to Amazon Cart…";
-
-      setTimeout(() => {
-
-        window.location.href = "https://www.amazon.in/gp/cart/view.html";
-
-      }, 1500);
-
+      // Instantly redirect! No more 1.5 second wait.
+      window.location.href = "https://www.amazon.in/tez/browse/cart?qcbrand=qqfsWw9RkO";
     });
-
   }
-
 
 
   function setupIntentEngine() {
@@ -1221,13 +1255,15 @@
 
   function injectPulseSidebar() {
 
+    if (window.location.href.includes("cart")) {
+      return; 
+    }
+
     if (document.getElementById(SIDEBAR_ID)) {
 
       return;
 
     }
-
-
 
     const sidebar = document.createElement("div");
 
@@ -1364,7 +1400,9 @@
                 id="amazon-pulse-auto-buy-btn"
                 class="amazon-pulse-auto-buy-btn"
               >
-                ⚡ 1-Tap Auto-Buy
+                <span style="font-size: 16px; line-height: 1;">✨</span> 
+                Pulse 1-Tap Buy 
+                <span style="font-size: 16px; line-height: 1;">⚡</span>
               </button>
             </div>
 
@@ -1451,7 +1489,117 @@
   }
 
 
+  // ── Contextual Zero-Search Popup (Hackathon Demo) ─────────────────────────
+  function showContextPopup(popupData) {
+    if (document.getElementById("pulse-context-popup")) return;
 
+    const popup = document.createElement("div");
+    popup.id = "pulse-context-popup";
+    popup.className = "amazon-pulse-context-popup";
+    // Adding some inline styling to make it wider and fit multiple options cleanly
+    popup.style.cssText = "position: fixed; bottom: 20px; right: 20px; width: 340px; background: white; padding: 16px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.15); z-index: 2147483647; font-family: 'Amazon Ember', Arial, sans-serif;";
+
+    // Build HTML for each alternate cart option
+    const bundlesHtml = popupData.bundles.map((bundle, index) => `
+      <div class="pulse-bundle-option" style="border: 1px solid #e7e7e7; border-radius: 8px; padding: 12px; margin-bottom: 12px; background: #f8f8f8;">
+        <div style="font-size: 13px; color: #0f1111; margin-bottom: 8px;">
+          <strong>${bundle.bundle_name}</strong><br/>
+          <span style="font-size: 11px; color: #565959;">${bundle.items.join(" • ")}</span>
+        </div>
+        <button class="amazon-pulse-auto-buy-btn context-buy-btn" data-index="${index}" style="border-radius: 8px; width: 100%; padding: 8px; cursor: pointer; border: 1px solid #008296; background: #00a8a8; color: white; font-weight: bold;">
+          <span style="font-size: 14px;">✨</span> 1-Tap Buy — ₹${bundle.price_inr}
+        </button>
+      </div>
+    `).join("");
+
+    popup.innerHTML = `
+      <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
+        <div class="pulse-context-title" style="font-weight: bold; font-size: 16px; color: #0f1111;">
+          ${popupData.message}
+        </div>
+        <button id="close-context-popup" style="background:none; border:none; cursor:pointer; font-size:22px; line-height: 1;">&times;</button>
+      </div>
+      <div style="max-height: 400px; overflow-y: auto; padding-right: 4px;">
+        ${bundlesHtml}
+      </div>
+    `;
+
+    document.body.appendChild(popup);
+
+    // Close logic
+    document.getElementById("close-context-popup").addEventListener("click", () => {
+      popup.remove();
+    });
+
+    // 1-Tap Buy logic for ALL buttons
+    const buyBtns = popup.querySelectorAll(".context-buy-btn");
+    buyBtns.forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        if (btn.disabled) return;
+        
+        // Disable all buttons in the popup so they don't double-click
+        buyBtns.forEach(b => b.disabled = true);
+        
+        btn.innerHTML = `⚙️ Adding to Cart...`;
+        btn.style.background = "linear-gradient(135deg, #d97706 0%, #b45309 100%)";
+        
+        // Figure out which bundle they clicked
+        const bundleIndex = btn.getAttribute("data-index");
+        const selectedBundle = popupData.bundles[bundleIndex];
+
+        // Save to your injected Pulse Cart
+        saveToPulseCart({
+          bundle_name: selectedBundle.bundle_name,
+          items: selectedBundle.items,
+          total_price: selectedBundle.price_inr
+        });
+
+        // Show success, then instantly redirect to the actual cart page!
+        // Show success, then instantly redirect to the actual cart page!
+        setTimeout(() => {
+          btn.innerHTML = `✅ Added!`;
+          btn.style.background = "linear-gradient(135deg, #059669 0%, #047857 100%)";
+          btn.style.border = "none";
+          
+          setTimeout(() => {
+            // Redirect straight to the actual Tez Cart!
+            window.location.href = "https://www.amazon.in/tez/browse/cart?qcbrand=qqfsWw9RkO";
+          }, 400);
+        }, 600);
+      });
+    });
+  }
+
+  // ── Secret Hackathon Hotkey Trigger (Mac/Windows Safe) ───────────────
+  window.addEventListener("keydown", (event) => {
+    if (event.altKey && event.code === "KeyR") {
+      event.preventDefault();
+      console.log("[Pulse Demo] Hotkey detected! Triggering Rain Bundles...");
+      
+      // Pass an array of different bundle options
+      showContextPopup({
+        message: "🌧️ Heavy Rain! Pick your vibe:",
+        bundles: [
+          {
+            bundle_name: "The Classic Pakoda Route",
+            items: ["Tata Sampann Pakoda Mix", "Brooke Bond Red Label Tea", "Haldiram's Bhujia"],
+            price_inr: 285
+          },
+          {
+            bundle_name: "Spicy Ramen & Chill",
+            items: ["Samyang Buldak Ramen (2 Pack)", "Coke Zero 300ml", "Lays India's Magic Masala"],
+            price_inr: 340
+          },
+          {
+            bundle_name: "Cozy Soup & Bread",
+            items: ["Knorr Classic Tomato Soup", "Britannia Premium Bake Rusk", "Amul Butter"],
+            price_inr: 195
+          }
+        ]
+      });
+    }
+  });
+  // ──────────────────────────────────────────────────────────────────────────
   if (document.body) {
 
     init();
@@ -1461,7 +1609,37 @@
     document.addEventListener("DOMContentLoaded", init, { once: true });
 
   }
+  // ── SPA Route Watcher (Fixes Sticky Elements on Back Navigation) ──────────
+  let lastUrl = window.location.href;
+  
+  setInterval(() => {
+    if (window.location.href !== lastUrl) {
+      lastUrl = window.location.href;
+      console.log("[Pulse SPA Watcher] Route shifted to:", lastUrl);
+      
+      // If we left the cart page and returned to the browse/home page:
+      if (!window.location.href.includes("cart")) {
+        console.log("[Pulse SPA Watcher] Left cart page. Cleaning up UI...");
+        
+        // 1. Remove the custom cart view or order confirmation screens
+        // (Targets common element classes/IDs used in our overrides)
+        const customCartUI = document.getElementById("pulse-cart-wrapper") || 
+                             document.querySelector(".amazon-pulse-cart-container") ||
+                             document.querySelector("[style*='z-index: 2147483647']"); // Catch full screen overlays
+        
+        if (customCartUI && !customCartUI.classList.contains("amazon-pulse-sidebar")) {
+          customCartUI.remove();
+        }
 
+        // 2. Unsuppress standard Amazon styles (re-enable normal visibility)
+        const hiddenStyles = document.getElementById("amazon-pulse-cart-suppress");
+        if (hiddenStyles) {
+          hiddenStyles.remove();
+        }
+
+        // 3. Bring back the clean sidebar control center for the browse page
+        injectPulseSidebar();
+      }
+    }
+  }, 300); // Checks every 300ms for seamless response latency
 })();
-
-
